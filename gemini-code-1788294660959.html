@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADR-Smart · Admin Dashboard</title>
+<meta name="theme-color" content="#0F6E56">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2624; --ink-soft:#54615C; --ink-faint:#8B948F;
+    --paper:#F6F4EE; --card:#FFFFFF; --line:#DCD8CC;
+    --teal:#0F6E56; --teal-deep:#085041; --teal-tint:#E1F5EE;
+    --amber:#BA7517; --amber-tint:#FAEEDA; --red:#A32D2D; --red-tint:#FCEBEB;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans', sans-serif; line-height:1.55;}
+  h1,h2,h3{font-family:'Source Serif 4', serif; font-weight:600; margin:0 0 6px;}
+  .shell{max-width:1080px; margin:0 auto; padding:28px 20px 80px;}
+  .brandbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:10px;}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{width:34px; height:34px; border-radius:8px; background:var(--teal); flex-shrink:0; display:flex; align-items:center; justify-content:center;}
+  .brand-mark svg{width:18px; height:18px; stroke:#fff;}
+  .brand-name{font-family:'Source Serif 4', serif; font-weight:600; font-size:17px;}
+  .tag{font-size:12px; color:var(--ink-faint); border:0.5px solid var(--line); padding:4px 10px; border-radius:20px;}
+  .card{background:var(--card); border:0.5px solid var(--line); border-radius:var(--radius); padding:24px; margin-bottom:18px;}
+  label{display:block; font-size:13px; font-weight:500; margin-bottom:6px;}
+  input[type=text],input[type=password],input[type=url]{
+    width:100%; padding:10px 12px; border:0.5px solid var(--line); border-radius:8px;
+    font-family:inherit; font-size:14px; background:#fff; color:var(--ink);
+  }
+  input:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal);}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:640px){.row2{grid-template-columns:1fr;}}
+  button{font-family:inherit; font-size:14px; font-weight:500; padding:10px 18px; border-radius:8px; cursor:pointer; border:0.5px solid transparent;}
+  button.primary{background:var(--teal); color:#fff;}
+  button.primary:hover{background:var(--teal-deep);}
+  button.secondary{background:transparent; color:var(--ink-soft); border-color:var(--line);}
+  button.secondary:hover{border-color:var(--ink-faint);}
+  .stats{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:6px;}
+  .stat{flex:1; min-width:140px; background:var(--card); border:0.5px solid var(--line); border-radius:var(--radius); padding:16px;}
+  .stat .num{font-size:26px; font-weight:600; font-family:'Source Serif 4', serif; color:var(--teal-deep);}
+  .stat .lbl{font-size:12px; color:var(--ink-soft);}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{padding:9px 10px; border-bottom:0.5px solid var(--line); text-align:left; white-space:nowrap;}
+  th{color:var(--ink-soft); font-weight:500; position:sticky; top:0; background:var(--card);}
+  tr:hover td{background:var(--teal-tint);}
+  .badge{padding:2px 8px; border-radius:20px; font-size:11px; font-weight:500;}
+  .badge-mild{background:var(--teal-tint); color:var(--teal-deep);}
+  .badge-moderate{background:var(--amber-tint); color:var(--amber);}
+  .badge-severe{background:var(--red-tint); color:var(--red);}
+  .badge-serious{background:var(--red-tint); color:var(--red);}
+  .table-wrap{overflow:auto; max-height:65vh; border:0.5px solid var(--line); border-radius:8px;}
+  .msg{font-size:13px; color:var(--ink-soft); margin-top:10px;}
+  .msg.err{color:var(--red);}
+  .toolbar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="brandbar">
+    <div class="brand">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 4 9 9 10 5-1 9-5 9-10V6l-9-4Z"/><path d="M9 12l2 2 4-4"/></svg></span>
+      <span class="brand-name">ADR-Smart · Admin</span>
+    </div>
+    <span class="tag">Central report registry</span>
+  </div>
+
+  <div class="card" id="setupCard">
+    <h2>Connect to your central storage</h2>
+    <div class="msg" style="margin-bottom:14px;">This page only runs in your browser. Nothing is saved on any third party's servers by this page itself — it simply reads the Google Sheet your Apps Script backend writes to.</div>
+    <div class="row2">
+      <div>
+        <label>Apps Script Web App URL</label>
+        <input type="url" id="endpointInput" value="https://script.google.com/macros/s/AKfycbwTC38j9-3V-IVLrVSdQYvuDRYd4b4oHqkTtea3LWL7jsVEPjy2M_67ZA5atDHfjH_h/exec" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <div>
+        <label>Shared key</label>
+        <input type="password" id="keyInput" placeholder="the SHARED_KEY you set in Code.gs">
+      </div>
+    </div>
+    <div style="margin-top:14px; display:flex; gap:10px;">
+      <button class="primary" onclick="loadReports()">Load reports</button>
+      <button class="secondary" onclick="forgetCreds()">Forget saved credentials</button>
+    </div>
+    <div class="msg" id="statusMsg"></div>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <div class="stats">
+      <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total reports</div></div>
+      <div class="stat"><div class="num" id="statSerious">0</div><div class="lbl">Flagged serious</div></div>
+      <div class="stat"><div class="num" id="statSevere">0</div><div class="lbl">Marked severe</div></div>
+      <div class="stat"><div class="num" id="statToday">0</div><div class="lbl">Received today</div></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <input type="text" id="searchBox" placeholder="Search by report ID, drug, reaction, reporter…" oninput="renderTable()" style="max-width:340px;">
+        <div style="display:flex; gap:10px;">
+          <button class="secondary" onclick="loadReports()">Refresh</button>
+          <button class="primary" onclick="exportCSV()">Export CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Report ID</th><th>Received</th><th>Reporter</th><th>Patient</th>
+              <th>Drug</th><th>Reaction</th><th>Severity</th><th>Serious?</th><th>Outcome</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let allRows = [];
+
+function loadCreds(){
+  document.getElementById("endpointInput").value = localStorage.getItem("adrAdminEndpoint") || "https://script.google.com/macros/s/AKfycbwTC38j9-3V-IVLrVSdQYvuDRYd4b4oHqkTtea3LWL7jsVEPjy2M_67ZA5atDHfjH_h/exec";
+  document.getElementById("keyInput").value = localStorage.getItem("adrAdminKey") || "ADMIN";
+}
+function forgetCreds(){
+  localStorage.removeItem("adrAdminEndpoint");
+  localStorage.removeItem("adrAdminKey");
+  document.getElementById("endpointInput").value = "";
+  document.getElementById("keyInput").value = "";
+  document.getElementById("statusMsg").textContent = "Saved credentials cleared from this browser.";
+}
+
+async function loadReports(){
+  const endpoint = document.getElementById("endpointInput").value.trim();
+  const key = document.getElementById("keyInput").value.trim();
+  const statusMsg = document.getElementById("statusMsg");
+  if(!endpoint || !key){
+    statusMsg.textContent = "Enter both the Web App URL and the shared key.";
+    statusMsg.className = "msg err";
+    return;
+  }
+  localStorage.setItem("adrAdminEndpoint", endpoint);
+  localStorage.setItem("adrAdminKey", key);
+  statusMsg.textContent = "Loading…";
+  statusMsg.className = "msg";
+  try{
+    const res = await fetch(endpoint + "?key=" + encodeURIComponent(key));
+    const json = await res.json();
+    if(!json.ok){
+      statusMsg.textContent = "Server said: " + (json.error || "request rejected. Check your key.");
+      statusMsg.className = "msg err";
+      return;
+    }
+    allRows = json.rows || [];
+    statusMsg.textContent = `Loaded ${allRows.length} report(s) at ${new Date().toLocaleTimeString()}.`;
+    statusMsg.className = "msg";
+    document.getElementById("dashboard").style.display = "block";
+    renderStats();
+    renderTable();
+  }catch(err){
+    statusMsg.textContent = "Could not reach the endpoint: " + err.message;
+    statusMsg.className = "msg err";
+  }
+}
+
+function renderStats(){
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById("statTotal").textContent = allRows.length;
+  document.getElementById("statSerious").textContent = allRows.filter(r => r.seriousnessFlags && String(r.seriousnessFlags).length).length;
+  document.getElementById("statSevere").textContent = allRows.filter(r => r.severity === "severe").length;
+  document.getElementById("statToday").textContent = allRows.filter(r => String(r.receivedAt||"").slice(0,10) === today).length;
+}
+
+function sevBadge(sev){
+  if(!sev) return "—";
+  const cls = sev==="mild" ? "badge-mild" : sev==="moderate" ? "badge-moderate" : "badge-severe";
+  return `<span class="badge ${cls}">${sev}</span>`;
+}
+
+function renderTable(){
+  const q = document.getElementById("searchBox").value.trim().toLowerCase();
+  const tbody = document.getElementById("tbody");
+  const rows = allRows.filter(r=>{
+    if(!q) return true;
+    return [r.reportId, r.drugName, r.reactionDesc, r.reporterName].some(v => String(v||"").toLowerCase().includes(q));
+  }).sort((a,b)=> String(b.receivedAt).localeCompare(String(a.receivedAt)));
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${escapeHTML(r.reportId)}</td>
+      <td>${escapeHTML(String(r.receivedAt||"").replace("T"," ").slice(0,16))}</td>
+      <td>${escapeHTML(r.reporterName)} ${r.reporterRole ? "· "+escapeHTML(r.reporterRole) : ""}</td>
+      <td>${escapeHTML(r.patientInitials||"—")}, ${escapeHTML(r.patientAge||"—")}${r.patientSex?", "+escapeHTML(r.patientSex):""}</td>
+      <td>${escapeHTML(r.drugName)}</td>
+      <td style="max-width:220px; white-space:normal;">${escapeHTML(r.reactionDesc)}</td>
+      <td>${sevBadge(r.severity)}</td>
+      <td>${r.seriousnessFlags ? `<span class="badge badge-serious">yes</span>` : "no"}</td>
+      <td>${escapeHTML(r.outcome||"—")}</td>
+    </tr>`).join("");
+}
+
+function exportCSV(){
+  if(!allRows.length) return;
+  const headers = Object.keys(allRows[0]);
+  const csv = [headers.join(",")]
+    .concat(allRows.map(r => headers.map(h => csvEscape(r[h])).join(",")))
+    .join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `adr-smart-reports-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function csvEscape(v){
+  const s = String(v ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
+loadCreds();
+</script>
+</body>
+</html>
